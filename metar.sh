@@ -8,8 +8,8 @@ set -euo pipefail
 # URL для получения HTML с METAR
 METAR_URL="https://www.metartaf.pro/ULLI"
 
-# Интервал обновления (в секундах) по умолчанию
-DEFAULT_UPDATE_INTERVAL=900
+# Интервал обновления (в минутах) по умолчанию
+DEFAULT_UPDATE_INTERVAL=15
 
 # Функция для получения HTML и извлечения METAR строки
 get_metar() {
@@ -100,13 +100,13 @@ decode_pressure() {
 # Функция для автоматического обновления METAR
 auto_update() {
   local interval="$1"
-  echo "Автоматическое обновление каждые $interval секунд. Нажмите Ctrl+C для выхода."
+  echo "Автоматическое обновление каждые $interval минут"
   while true; do
     local metar
     metar=$(get_metar)
     decode_metar "$metar"
     echo "---------------------------------------"
-    sleep "$interval"
+    sleep $((interval * 60))
   done
 }
 
@@ -118,7 +118,7 @@ main() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
       --upd)
-        update_interval="${2:-}"
+        update_interval=$(($2 / 60))  # Интерпретируем переданный аргумент как секунды и преобразуем в минуты
         shift 2
         ;;
       *)
